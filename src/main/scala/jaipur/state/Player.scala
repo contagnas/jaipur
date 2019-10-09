@@ -1,10 +1,11 @@
 package jaipur.state
 
+import jaipur.Count
 import jaipur.components.Card.GoodsCard
 import jaipur.components.Token
 
 case class Player(
-  hand: List[GoodsCard] = Nil,
+  hand: Count[GoodsCard] = Count.empty,
   tokens: List[Token] = Nil,
   roundsWon: Int = 0,
   camels: Int = 0,

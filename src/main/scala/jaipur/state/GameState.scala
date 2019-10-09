@@ -16,7 +16,7 @@ case class GameState(
   deck: Count[Card],
   players: Map[Seat, Player],
   currentPlayer: Seat,
-  market: List[Card],
+  market: Count[Card],
   goodsTokens: Map[Good, List[GoodsToken]],
   bonusTokens: Map[Int, Count[BonusToken]],
   prevState: GameState,
@@ -36,31 +36,11 @@ object GameState {
     val players: Map[Seat, Player] = Seat.forPlayers(2)
     val deck: Count[Card] = Card.deck
 
-    val deckWithoutCamels: Count[Card] = deck.update(Camel, _ - 3)
-    val marketCamels: List[Card] = List.fill(3)(Camel)
-
-    val (deckWithMarketDrawn, marketCards) = deckWithoutCamels.takeRandom(constants.rng, 2)
-    val market = marketCards ++ marketCamels
-
-    val (deckWithPlayer1Drawn, player1Hand) = deckWithMarketDrawn.takeRandom(constants.rng, 5)
-    val (deckWithPlayer2Drawn, player2Hand) = deckWithPlayer1Drawn.takeRandom(constants.rng, 5)
-
-    val playersWithHands = players.map {
-      case (s@Seat(0), player1) => s -> player1.copy(
-        hand = player1Hand.collect { case g: GoodsCard => g },
-        camels = player1Hand.collect { case Camel => 1 }.sum
-      )
-      case (s@Seat(1), player2) => s -> player2.copy(
-        hand = player2Hand.collect { case g: GoodsCard => g },
-        camels = player2Hand.collect { case Camel => 1 }.sum
-      )
-    }
-
     GameState(
-      deck = deckWithPlayer2Drawn,
-      players = playersWithHands,
+      deck = deck,
+      players = players,
       currentPlayer = players.head._1,
-      market = market,
+      market = Count.empty,
       goodsTokens = Token.allGoodsTokens,
       bonusTokens = Token.allBonusTokens,
       prevState = null,
