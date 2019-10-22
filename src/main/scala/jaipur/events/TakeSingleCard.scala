@@ -1,6 +1,7 @@
 package jaipur.events
 
 import jaipur.components.Card.GoodsCard
+import jaipur.components.Good
 import jaipur.state.GameState
 
 case class TakeSingleCard(card: GoodsCard) extends Event {
@@ -12,16 +13,24 @@ case class TakeSingleCard(card: GoodsCard) extends Event {
     else None
 
   override def run(state: GameState): GameState = {
-    val (remainingDeck, drawnCard) = state.deck.takeRandom(state.constants.rng)
+    val (remainingDeck, drawnCard) = state.deck.takeRandom(state.constants.rng, 1)
     val remainingMarket = state.market.update(card, _ - 1)
 
     state.updateCurrentPlayer(
-      p => p.copy(hand  =p.hand.update(card, _ + 1))
+      p => p.copy(hand = p.hand.update(card, _ + 1))
     ).copy(
       deck = remainingDeck,
-      market = remainingMarket.update(drawnCard, _ + 1)
+      market = remainingMarket.addAll(drawnCard)
     )
   }
 
   override def nextEvent(state: GameState): Event = EndTurn
 }
+
+object TakeSingleCard {
+  implicit val enum = new Enumerable[TakeSingleCard] {
+    override def allPossibleMoves: Seq[TakeSingleCard] =
+      Good.values.map(GoodsCard.apply).map(TakeSingleCard.apply)
+  }
+}
+

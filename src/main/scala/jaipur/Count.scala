@@ -116,8 +116,12 @@ class Count[K] private(private val map: Map[K, Int]) {
 
   def takeRandom(rng: Random, number: Int): (Count[K], Count[K]) =
     (1 to number).foldLeft((this, Count.empty[K])) { case ((count, draws), _) =>
-      val (removed, drawn) = count.takeRandom(rng)
-      (removed, draws.update(drawn, _ + 1))
+      if (count.map.isEmpty) {
+        (count, draws)
+      } else {
+        val (removed, drawn) = count.takeRandom(rng)
+        (removed, draws.update(drawn, _ + 1))
+      }
     }
 
   override def toString: String = {

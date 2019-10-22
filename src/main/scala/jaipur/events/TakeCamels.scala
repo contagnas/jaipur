@@ -4,7 +4,7 @@ import jaipur.components.Card.Camel
 import jaipur.state.GameState
 import cats.implicits._
 
-object TakeCamels extends Event {
+case object TakeCamels extends Event {
   override def validationError(state: GameState): Option[TakeCamels.InvalidMessage] =
     if (!state.market.contains(Camel))
       Some("The market has no camels to take.")
@@ -19,9 +19,13 @@ object TakeCamels extends Event {
       p => p.copy(camels = p.camels + numberOfCamels)
     ).copy(
       deck = remainingDeck,
-      market = state.market |+| drawnCards
+      market = state.market.set(Camel, 0) |+| drawnCards
     )
   }
 
   override def nextEvent(state: GameState): Event = EndTurn
+
+  implicit val enum = new Enumerable[TakeCamels.type] {
+    override def allPossibleMoves: Seq[TakeCamels.type] = Seq(TakeCamels)
+  }
 }

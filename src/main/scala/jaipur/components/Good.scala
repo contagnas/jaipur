@@ -24,6 +24,6 @@ object Good extends Enum[Good] {
   }
 
   override def values: IndexedSeq[Good] =
-    ExpensiveGood.findValues ++ CheapGood.findValues
+    ExpensiveGood.values ++ CheapGood.values
 }
 

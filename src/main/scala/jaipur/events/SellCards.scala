@@ -46,3 +46,14 @@ case class SellCards(card: GoodsCard, number: Int) extends Event {
 
   override def nextEvent(state: GameState): Event = EndTurn
 }
+
+object SellCards {
+  implicit val enum = new Enumerable[SellCards] {
+    override def allValidMoves(state: GameState): Set[SellCards] = {
+      for {
+        good <- state.currentPlayerState.hand.nonZeroItems
+        count <- 1 to state.currentPlayerState.hand.get(good)
+      } yield SellCards(good, count)
+    }.filter(_.validationError(state).isEmpty)
+  }
+}

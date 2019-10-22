@@ -11,16 +11,14 @@ case class Player(
   camels: Int = 0,
 )
 
-class Seat private (val playerNumber: Int, numberOfPlayers: Int) {
+case class Seat(playerNumber: Int, numberOfPlayers: Int) {
   def nextPlayer: Seat = {
     val nextPlayerNumber: Int = (playerNumber + 1) % numberOfPlayers
-    new Seat(nextPlayerNumber, numberOfPlayers)
+    copy(playerNumber = nextPlayerNumber)
   }
 }
 
 object Seat {
-  def unapply(arg: Seat): Option[Int] = Some(arg.playerNumber)
-
   def forPlayers(numberOfPlayers: Int): Map[Seat, Player] = {
     (0 until numberOfPlayers).map(seatNumber =>
       new Seat(seatNumber, numberOfPlayers) -> Player()
