@@ -5,7 +5,7 @@ import jaipur.components.Card
 import jaipur.components.Card.{Camel, GoodsCard}
 import jaipur.state.GameState
 
-case class ExchangeCards(fromHand: Count[GoodsCard], camelsExchanged: Int, fromMarket: Count[Card]) extends Event {
+case class ExchangeCards(fromHand: Count[GoodsCard], camelsExchanged: Int, fromMarket: Count[GoodsCard]) extends Event {
   override def validationError(state: GameState): Option[InvalidMessage] = {
     val marketGoodsCards = fromMarket.collectKeys { case g: GoodsCard => g }
     if (fromMarket.total < 2)
@@ -20,21 +20,16 @@ case class ExchangeCards(fromHand: Count[GoodsCard], camelsExchanged: Int, fromM
       Some(s"The market does not have all of $fromMarket.")
     else if (fromHand.nonZeroItems.intersect(marketGoodsCards.nonZeroItems).nonEmpty)
       Some("You may not exchange a card in your hand for the same card from the market.")
-    else if (camelsExchanged > 0 && fromMarket.contains(Camel))
-      Some("You may not exchange a card in your hand for the same card from the market.")
     else None
   }
 
   override def run(state: GameState): GameState = {
-    val camelsTaken = fromMarket.collectKeys { case Camel => Camel }
-    val goodsTaken = fromMarket.collectKeys { case gc: GoodsCard => gc }
-
     state.copy(
       market = state.market.subtractAll(fromMarket).addAll(fromHand).update(Camel, _ + camelsExchanged)
     ).updateCurrentPlayer(
       p => p.copy(
-        hand = p.hand.subtractAll(fromHand).addAll(goodsTaken),
-        camels = p.camels - camelsExchanged + camelsTaken.total
+        hand = p.hand.subtractAll(fromHand).addAll(fromMarket),
+        camels = p.camels - camelsExchanged
       )
     )
   }
@@ -45,9 +40,10 @@ case class ExchangeCards(fromHand: Count[GoodsCard], camelsExchanged: Int, fromM
 object ExchangeCards {
   implicit val enum = new Enumerable[ExchangeCards] {
     override def allValidMoves(state: GameState): Set[ExchangeCards] = {
+      val marketGoodsCards = state.market.collectKeys { case g: GoodsCard => g }
       val allPossible = for {
         hand <- state.currentPlayerState.hand.choices
-        market <- state.market.choices
+        market <- marketGoodsCards.choices
         camelsNeeded = market.total - hand.total
         if camelsNeeded >= 0 && camelsNeeded <= state.currentPlayerState.camels
       } yield ExchangeCards(hand, camelsNeeded, market)
