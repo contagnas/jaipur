@@ -20,6 +20,8 @@ case class ExchangeCards(fromHand: Count[GoodsCard], camelsExchanged: Int, fromM
       Some(s"The market does not have all of $fromMarket.")
     else if (fromHand.nonZeroItems.intersect(marketGoodsCards.nonZeroItems).nonEmpty)
       Some("You may not exchange a card in your hand for the same card from the market.")
+    else if (camelsExchanged + state.currentPlayerState.hand.total > 7)
+      Some("You may not exchange camels to put more than 7 cards in your hand.")
     else None
   }
 
