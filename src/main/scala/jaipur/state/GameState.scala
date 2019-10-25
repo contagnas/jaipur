@@ -1,9 +1,9 @@
 package jaipur.state
 
 import jaipur.Count
-import jaipur.components.Card.{Camel, GoodsCard}
 import jaipur.components.Token.{BonusToken, GoodsToken}
 import jaipur.components.{Card, Good, Token}
+import jaipur.events.{DealCards, Event}
 
 import scala.util.Random
 
@@ -20,7 +20,8 @@ case class GameState(
   goodsTokens: Map[Good, List[GoodsToken]],
   bonusTokens: Map[Int, Count[BonusToken]],
   prevState: GameState,
-  constants: Constants
+  constants: Constants,
+  nextEvent: Event
 ) {
   val currentPlayerState: Player = players(currentPlayer)
 
@@ -44,7 +45,8 @@ object GameState {
       goodsTokens = Token.allGoodsTokens,
       bonusTokens = Token.allBonusTokens,
       prevState = null,
-      constants = constants
+      constants = constants,
+      nextEvent = DealCards
     )
   }
 }
